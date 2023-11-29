@@ -15,10 +15,8 @@
                 }
                 componentDidMount() {
                     this.fetchData();
-                    this.intervalId = setInterval(() => this.fetchData(), 1000);
                 }
                 componentWillUnmount() {
-                    clearInterval(this.intervalId);
                 }
                 fetchData() {
                     fetch(url + "books").then(res => res.json()).then(data => {
@@ -55,92 +53,73 @@
                     this.setState({ allBooks: data });
                     });
                 }
-                checkOut(id, title) { // no further input validation for if the date is in the correct form m/d/y
-                    if(document.getElementById(id).value == "" || document.getElementById(title).value == ""){
-                        console.log("id or title is null");
-                    } else {
-                        fetch(url + "books/" + id, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            "avail": false,
-                            "due": document.getElementById(title).value,
-                            "who": document.getElementById(id).value
-                        })
-                    }).then(res=>res.json()).then(data=>{
-                        console.log(data); // response success/code
-                        this.getData();
-                    });
-                    }
-                }
-                checkIn (id) {
-                    console.log("check in book: " + id);
-                    fetch(url + "books/" + id, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            "avail": true,
-                            "due": "",
-                            "who": ""
-                            // unsure how to delete attributes without chaning put route, because books that are not checked out dont have the who and due attributes in ricks example
-                        })
-                    }).then(res=>res.json()).then(data=>{
-                        console.log(data);
-                        this.getData();
-                    });
-                }
                 render() {
-                    let element = document.getElementById("contentPair");
-                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-                    // if i was not using innerhtml i think i would not have to clear the board everytime it updates
-                    console.log("updated all books")
-                    for(let i = 0; i < this.state.allBooks.length; i++){
-                        if(this.state.allBooks[i].avail == true) { // we want a button
-                            element.innerHTML += "<span class='book-item'>Title: " + this.state.allBooks[i].title +
-                                                    " <br> ID: " + this.state.allBooks[i].id +
-                                                    " <br> Author: " + this.state.allBooks[i].author +
-                                                    " <br> Status: " + this.state.allBooks[i].avail +
-                                                    "<input type='text' id='" + this.state.allBooks[i].id +
-                                                    "' placeholder='Who'> <input type='text' id='" + this.state.allBooks[i].title +
-                                                    "' placeholder='Due Date'> <button onclick=' checkOut(" + this.state.allBooks[i].id + ", \"" + this.state.allBooks[i].title + // error, cannot reference the checkin/out functions in the componet
-                                                    "\")'> Check out</button></span>"
-                        } else {
-                            element.innerHTML += "<span class='book-item'>Title: " + this.state.allBooks[i].title + " <br> ID: " + this.state.allBooks[i].id + 
-                                                    " <br> Author: " + this.state.allBooks[i].author + " <br> Status: " + this.state.allBooks[i].avail + 
-                                                    "<button onclick='this.checkIn(" + this.state.allBooks[i].id + ", \"" + this.state.allBooks[i].title +
-                                                    "\")'> Check In</button></span>";
-                        }
-                    }
+                    return (
+                        <div>
+                            {this.state.allBooks.map(book => (
+                            <div key={book.id} className="book-item">
+                                Title: {book.title} <br />
+                                ID: {book.id} <br />
+                                Author: {book.author} <br />
+                                Status: {book.avail ? 'Available' : 'Checked Out'} <br />
+                                {book.avail ? (
+                                <>
+                                    <input type="text" id={book.id} placeholder="Who" />
+                                    <input type="text" id={book.title} placeholder="Due Date" />
+                                    <button onClick={() => checkOut(book.id, book.title)}>Check out</button>
+                                </>
+                                ) : (
+                                <button onClick={() => checkIn(book.id, book.title)}>Check In</button>
+                                )}
+                            </div>
+                            ))}
+                        </div>
+                    )
                 }
             }
 
         
             let url = "http://127.0.0.1:3000/";
-            // function checkOut(id, title){ // pointless to have title
-            //     // fetch request that updates info in database, then calls listAvailBooks() to update the page
-            //     console.log("id: " + id + " title: " + title);
-            //     if(document.getElementById(id).value == "" || document.getElementById(title).value == ""){
-            //         console.log("id or title is null");
-            //     } else {
-            //         fetch(url + "books/" + id, {
-            //         method: 'PUT',
-            //         headers: {
-            //             'Content-Type': 'application/json'
-            //         },
-            //         body: JSON.stringify({
-            //             "avail": false,
-            //             "due": document.getElementById(title).value,
-            //             "who": document.getElementById(id).value
-            //         })
-            //     }).then(res=>res.json()).then(data=>{
-            //         console.log(data); // response success/code
-            //     });
-            //     }
-            // }
+            function checkIn(id) {
+                console.log("check in book: " + id);
+                fetch(url + "books/" + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "avail": true,
+                        "due": "",
+                        "who": ""
+                    })
+                }).then(res=>res.json()).then(data=>{
+                    console.log(data);
+                    window.location.reload();
+                });
+            }
+            function checkOut(id, title){ // pointless to have title
+                // fetch request that updates info in database, then calls listAvailBooks() to update the page
+                console.log("id: " + id + " title: " + title);
+                if(document.getElementById(id).value == "" || document.getElementById(title).value == ""){
+                    console.log("id or title is null");
+                } else {
+                    fetch(url + "books/" + id, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    body: JSON.stringify({
+                        "avail": false,
+                        "due": document.getElementById(title).value,
+                        "who": document.getElementById(id).value
+                    })
+                }).then(res=>res.json()).then(data=>{
+                    console.log(data); // response success/code
+                    // insert refresh page
+                    window.location.reload();
+                });
+                }
+            }
             // function listAvailBooks() { 
             //     // could have one function with a parameter that specifys if i want to list all books, avail books, or checked out books. then the button would say check in or check out depending on the avail attribute of the book
             //     // but i think that function would be incredibly long, but also breaks the rule of dont repeat code
@@ -167,22 +146,6 @@
             //         for (let i = 0; i < data.length; i++) {
             //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + " <br> Status: " + data[i].avail + "</span>";
             //         } 
-            //     });
-            // }
-            // function checkIn(id) {
-            //     console.log("check in book: " + id);
-            //     fetch(url + "books/" + id, {
-            //         method: 'PUT',
-            //         headers: {
-            //             'Content-Type': 'application/json'
-            //         },
-            //         body: JSON.stringify({
-            //             "avail": true,
-            //             "due": "",
-            //             "who": ""
-            //         })
-            //     }).then(res=>res.json()).then(data=>{
-            //         console.log(data);
             //     });
             // }
             // function listCheckedOutBooks(){
