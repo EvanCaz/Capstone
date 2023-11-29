@@ -1,4 +1,4 @@
-const cs = "mongodb+srv://evan:BigMistake@cluster.0b689p3.mongodb.net/?retryWrites=true&w=majority";
+const cs = "mongodb+srv://***************@cluster.0b689p3.mongodb.net/?retryWrites=true&w=majority";
 
 const {MongoClient} = require('mongodb');
 const client = new MongoClient(cs);
