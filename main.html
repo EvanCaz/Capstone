@@ -7,10 +7,49 @@
         <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script >
+        <script type="text/babel">
             const { useState } = React; // import { useState } from 'react';
+            class TotalBooks extends React.Component { 
+                // dont understand the purpose of this, does not update when server is change, need a interval thingy
+                // which i think is stupid, i dont understand the purpose of react if i have to use a interval to update the page
+                // which i could def be doing it wrong
+                constructor(props) { super(props);
+                this.state = { total: 0, avail: 0, unavail: 0 };
+                }
+                componentDidMount() {
+                    this.fetchData();
+                    this.intervalId = setInterval(() => this.fetchData(), 1000);
+                }
+                componentWillUnmount() {
+                    clearInterval(this.intervalId);
+                }
+                fetchData() {
+                    fetch(url + "books").then(res => res.json()).then(data => {
+                    this.setState({ total: data.length });
+                    });
+                    fetch(url + "books?avail=false").then(res => res.json()).then(data => {
+                    this.setState({ unavail: data.length });
+                });
+                    fetch(url + "books?avail=true").then(res => res.json()).then(data => {
+                    this.setState({ avail: data.length });
+                    });
+                }
+                render() { 
+                    return ( <>
+                        <div className = "info">
+                        <p>Total Books {this.state.total} </p> 
+                        <p>Available Books {this.state.avail} </p>
+                        <p>Unavailable Books: {this.state.unavail} </p>
+                        </div>
+                        </>
+                    );
+                }
+            }
+
+        </script>
+        <script >
             let url = "http://127.0.0.1:3000/";
-            function checkOut(id, title){
+            function checkOut(id, title){ // pointless to have title
                 // fetch request that updates info in database, then calls listAvailBooks() to update the page
                 console.log("id: " + id + " title: " + title);
                 if(document.getElementById(id).value == "" || document.getElementById(title).value == ""){
@@ -27,14 +66,14 @@
                         "who": document.getElementById(id).value
                     })
                 }).then(res=>res.json()).then(data=>{
-                    console.log(data);
-                    listAvailBooks();
+                    console.log(data); // response success/code
+                    listAvailBooks(); // reset
                 });
                 }
-                listAvailBooks(); // reset
             }
             function listAvailBooks() { 
                 // could have one function with a parameter that specifys if i want to list all books, avail books, or checked out books. then the button would say check in or check out depending on the avail attribute of the book
+                // but i think that function would be incredibly long, but also breaks the rule of dont repeat code
                 console.log("list avail books");
                 fetch(url +"books?avail=true").then(res=>res.json()).then(data=>{
                     let element = document.getElementById("contentPair");
@@ -50,8 +89,53 @@
                     } 
                 });
             }
-            // in the main content, id like a react componet that would dispaly a button that either says "check out" or "check in" depending on the avail attribute status of the book and which button is clicked in the nav bar
-            // when the button is clicked, it will change the avail attribute of the book to the opposite of what it was before and provides a field to enter the name of the person checking out the book as well as the date its due
+            function listAllBooks() {
+                console.log("list all books");
+                fetch(url + "books").then(res=>res.json()).then(data=>{
+                    let element = document.getElementById("contentPair");
+                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+                    for (let i = 0; i < data.length; i++) {
+                        element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + " <br> Status: " + data[i].avail + "</span>";
+                    } 
+                });
+            }
+            function checkIn(id) {
+                console.log("check in book: " + id);
+                fetch(url + "books/" + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "avail": true,
+                        "due": "",
+                        "who": ""
+                    })
+                }).then(res=>res.json()).then(data=>{
+                    console.log(data);
+                    listCheckedOutBooks();
+                });
+            }
+            function listCheckedOutBooks(){
+                console.log("list unavail books");
+                fetch(url + "books?avail=false").then(res=>res.json()).then(data=>{
+                    let element = document.getElementById("contentPair");
+                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+                    for (let i = 0; i < data.length; i++) {
+                        element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
+                                                "<button onclick='checkIn(" + data[i].id + ", \"" + data[i].title + 
+                                                "\")'> Check in</button></span>";
+                    } 
+                });
+            } 
+            /*
+                This code breaks the cardinal rule of repeating code, that can be addressed but adds a lot of complexity(not really) but makes the function very long and lowers readability 
+                cases the code does not handle: 
+                    if the number of books displayed exceeds the area in the center of the page
+                    deleting a book but this is not require by assignmnet
+                    updating book information but this is not require by assignmnet
+                    adding a book but this is not require by assignmnet
+            */
         </script>
     </head>
     <body> 
@@ -74,11 +158,14 @@
             </div>
             <div class = 'sideBar'>
                 <h4>
-                    side bar
+                    Important Information
                 </h4>
-                <p> 
-                   I wish for this to be a react componet that reacts based on the link clicked in nav bar and changes information displayed here to explain what is being displayed in main content
-                </p>
+                <div id="totalBooks"> </div>
+                <script type="text/babel">
+                    const root = ReactDOM.createRoot(document.getElementById('totalBooks'));
+                    root.render(<TotalBooks />);
+                    
+                </script>
             </div>
         </div>
         <div class = 'footer'>
