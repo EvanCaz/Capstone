@@ -28,7 +28,7 @@ async function start(){
  // need the standard functions to handle server requests and update the monogo server
  app.get('/books', (req, res) => {
     let status = req.query.avail === "true";
-    let projection = { title: 1, id: 1, _id:0 }; // Include only title and id fields
+    let projection = { title: 1, id: 1, _id:0, author:1 }; // Include only title and id fields
     if (req.query.avail === undefined) {
         books.find({}, { projection }).toArray().then(books => res.json(books));
     } else {

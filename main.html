@@ -9,14 +9,17 @@
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
         <script >
             //const { useState } = React; // import { useState } from 'react';
-            let url = "http://localhost:3000/";
+            let url = "http://127.0.0.1:3000/";
 
             function listAvailBooks() {
                 console.log("list avail books");
-                var request = new XMLHttpRequest();
-                request.open("GET", URL + "books?avail=true", false); // false means sync function, true means async
-                request.send(null); // null means no body, cors issue
-                document.getElementById("contentPair").innerHTML = request.responseText;
+                fetch(url +"books").then(res=>res.json()).then(data=>{
+                    let element = document.getElementById("contentPair");
+                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+                    for (let i = 0; i < data.length; i++) {
+                        element.innerHTML += "<span class='book-item'>" + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + "</span>";
+                    }
+                });
             }
             // in the main content, id like a react componet that would dispaly a button that either says "check out" or "check in" depending on the avail attribute status of the book and which button is clicked in the nav bar
             // when the button is clicked, it will change the avail attribute of the book to the opposite of what it was before and provides a field to enter the name of the person checking out the book as well as the date its due
