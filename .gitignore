@@ -1,0 +1,8 @@
+*
+*/
+
+#unignore what we want to track
+!*.js
+!*.html
+!.gitignore
+!.md
