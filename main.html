@@ -53,7 +53,7 @@
                     this.setState({ allBooks: data });
                     });
                 }
-                render() {
+                render() { // i like the inline ternary operator it is dope 
                     return (
                         <div>
                             {this.state.allBooks.map(book => (
@@ -77,8 +77,6 @@
                     )
                 }
             }
-
-        
             let url = "http://127.0.0.1:3000/";
             function checkIn(id) {
                 console.log("check in book: " + id);
@@ -120,55 +118,6 @@
                 });
                 }
             }
-            // function listAvailBooks() { 
-            //     // could have one function with a parameter that specifys if i want to list all books, avail books, or checked out books. then the button would say check in or check out depending on the avail attribute of the book
-            //     // but i think that function would be incredibly long, but also breaks the rule of dont repeat code
-            //     console.log("list avail books");
-            //     fetch(url +"books?avail=true").then(res=>res.json()).then(data=>{
-            //         let element = document.getElementById("contentPair");
-            //         element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-            //         for (let i = 0; i < data.length; i++) {
-            //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
-            //                                     "<input type='text' id='" + data[i].id + "' placeholder = 'Who'><input type='text' id='" + data[i].title + "' placeholder = 'Return Date'><button onclick='checkOut(" + data[i].id + ", \"" + data[i].title + 
-            //                                     "\")'> Check out</button></span>";
-
-            //             // always check out because this is avail books only
-            //             // the button should change the avail attribute of the book to false and provide a field to enter the name of the person checking out the book as well as the date its due
-
-            //         } 
-            //     });
-            // }
-            // function listAllBooks() {
-            //     console.log("list all books");
-            //     fetch(url + "books").then(res=>res.json()).then(data=>{
-            //         let element = document.getElementById("contentPair");
-            //         element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-            //         for (let i = 0; i < data.length; i++) {
-            //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + " <br> Status: " + data[i].avail + "</span>";
-            //         } 
-            //     });
-            // }
-            // function listCheckedOutBooks(){
-            //     console.log("list unavail books");
-            //     fetch(url + "books?avail=false").then(res=>res.json()).then(data=>{
-            //         let element = document.getElementById("contentPair");
-            //         element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-            //         for (let i = 0; i < data.length; i++) {
-            //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
-            //                                     "<button onclick='checkIn(" + data[i].id + ", \"" + data[i].title + 
-            //                                     "\")'> Check in</button></span>";
-            //         } 
-            //     });
-            // } 
-            /*
-                This code breaks the cardinal rule of repeating code, that can be addressed but adds a lot of complexity(not really) but makes the function very long and lowers readability 
-                but can probably be fixed with react which is what I am trying to do
-                cases the code does not handle: 
-                    if the number of books displayed exceeds the area in the center of the page
-                    deleting a book but this is not require by assignmnet
-                    updating book information but this is not require by assignmnet
-                    adding a book but this is not require by assignmnet
-            */
         </script>
     </head>
     <body> 
@@ -179,9 +128,6 @@
         <div class = "container"> 
             <div class = 'navBar'>
                 <h4> <u>Options:</u></h4>
-                <!-- <button id = "availableBooks" onclick="listAvailBooks()">Available Books</button>
-                <button id = "allBooks" onclick="listAllBooks()">All Books</button>
-                <button id = "checkedOutBooks" onclick="listCheckedOutBooks()">Checked Out Books</button> -->
             </div>
             <script type="text/babel">
                 
