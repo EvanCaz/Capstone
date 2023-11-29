@@ -37,5 +37,12 @@ async function start(){
     //console.log("Returning books");
 });
 
+app.put('/books/:id', (req, res) => {
+    let newbook = req.body;
+    books.updateOne({ id: req.params.id }, { $set: newbook }).then(result => {
+        res.status(result.modifiedCount > 0 ? 200 : 404).json(result.modifiedCount > 0 ? "Book updated" : "Book not found");
+    });
+});
+
 
 start();

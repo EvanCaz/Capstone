@@ -8,17 +8,46 @@
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
         <script >
-            //const { useState } = React; // import { useState } from 'react';
+            const { useState } = React; // import { useState } from 'react';
             let url = "http://127.0.0.1:3000/";
-
-            function listAvailBooks() {
+            function checkOut(id, title){
+                // fetch request that updates info in database, then calls listAvailBooks() to update the page
+                console.log("id: " + id + " title: " + title);
+                if(document.getElementById(id).value == "" || document.getElementById(title).value == ""){
+                    console.log("id or title is null");
+                } else {
+                    fetch(url + "books/" + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "avail": false,
+                        "due": document.getElementById(title).value,
+                        "who": document.getElementById(id).value
+                    })
+                }).then(res=>res.json()).then(data=>{
+                    console.log(data);
+                    listAvailBooks();
+                });
+                }
+                listAvailBooks(); // reset
+            }
+            function listAvailBooks() { 
+                // could have one function with a parameter that specifys if i want to list all books, avail books, or checked out books. then the button would say check in or check out depending on the avail attribute of the book
                 console.log("list avail books");
-                fetch(url +"books").then(res=>res.json()).then(data=>{
+                fetch(url +"books?avail=true").then(res=>res.json()).then(data=>{
                     let element = document.getElementById("contentPair");
                     element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
                     for (let i = 0; i < data.length; i++) {
-                        element.innerHTML += "<span class='book-item'>" + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + "</span>";
-                    }
+                        element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
+                                                "<input type='text' id='" + data[i].id + "' placeholder = 'Who'><input type='text' id='" + data[i].title + "' placeholder = 'Return Date'><button onclick='checkOut(" + data[i].id + ", \"" + data[i].title + 
+                                                "\")'> Check out</button></span>";
+
+                        // always check out because this is avail books only
+                        // the button should change the avail attribute of the book to false and provide a field to enter the name of the person checking out the book as well as the date its due
+
+                    } 
                 });
             }
             // in the main content, id like a react componet that would dispaly a button that either says "check out" or "check in" depending on the avail attribute status of the book and which button is clicked in the nav bar
