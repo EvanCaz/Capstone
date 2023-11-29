@@ -7,20 +7,19 @@
         <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <script type="text/babel">
-            const { useState } = React; // import { useState } from 'react';
-            // react functional componets
+        <script >
+            //const { useState } = React; // import { useState } from 'react';
+            let url = "http://localhost:3000/";
 
-
-            function ListBooks() { // cant change name of function
-                const [count, setCount] = React.useState(0);
-                function handleClick() {setCount(count + 1);} // change to list all books
-
-            return (
-                <button onClick={handleClick}>List All Books</button>
-            );
+            function listAvailBooks() {
+                console.log("list avail books");
+                var request = new XMLHttpRequest();
+                request.open("GET", URL + "books?avail=true", false); // false means sync function, true means async
+                request.send(null); // null means no body, cors issue
+                document.getElementById("contentPair").innerHTML = request.responseText;
             }
-
+            // in the main content, id like a react componet that would dispaly a button that either says "check out" or "check in" depending on the avail attribute status of the book and which button is clicked in the nav bar
+            // when the button is clicked, it will change the avail attribute of the book to the opposite of what it was before and provides a field to enter the name of the person checking out the book as well as the date its due
         </script>
     </head>
     <body> 
@@ -30,17 +29,16 @@
         </div>
         <div class = "container"> 
             <div class = 'navBar'>
-                <h4> <u>Links:</u></h4>
-                <h4 id="allBooks"> Avaidable Books</h4>
-                <h4> All Books</h4>
-                <h4> Checked Out Books</h4>
+                <h4> <u>Options:</u></h4>
+                <button id = "availableBooks" onclick="listAvailBooks()">Available Books</button>
+                <button id = "allBooks" onclick="listAllBooks()">All Books</button>
+                <button id = "checkedOutBooks" onclick="listCheckedOutBooks()">Checked Out Books</button>
             </div>
             <script type="text/babel">
-                const root1 = ReactDOM.createRoot(document.getElementById('allBooks'));  // functional 
-                root1.render(<ListBooks />);
+                
             </script>
             <div class = "mainContent">
-                <div id = "contentPair"></div>
+                <p id = "contentPair"></p>
             </div>
             <div class = 'sideBar'>
                 <h4>
@@ -52,6 +50,6 @@
             </div>
         </div>
         <div class = 'footer'>
-            <p><strong>Footer stuff:</strong> This adivce is 100% correct, if it does not work for you, something is wrong with you not this advice</p>
+            <p><strong>Footer stuff:</strong> information</p>
             </div>
     </body>
