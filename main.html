@@ -1,7 +1,7 @@
 <!DOCTYPE html>
     <head>
         <title>CSS Assignment</title>
-        <link rel="stylesheet" href="main.css">
+        <link rel="stylesheet" id = "stylesheet" href="style1.css">
         <meta charset="UTF-8" />
         <title>Hello World</title>
         <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -77,6 +77,7 @@
                     )
                 }
             }
+
             let url = "http://127.0.0.1:3000/";
             function checkIn(id) {
                 console.log("check in book: " + id);
@@ -118,6 +119,18 @@
                 });
                 }
             }
+            function brown() {
+                let stylesheet = document.getElementById('stylesheet');
+                stylesheet.href = "style1.css";
+            }
+            function blue() {
+                let stylesheet = document.getElementById('stylesheet');
+                stylesheet.href = "style2.css";
+            }
+            function christmas() {
+                let stylesheet = document.getElementById('stylesheet');
+                stylesheet.href = "style3.css";
+            }
         </script>
     </head>
     <body> 
@@ -128,6 +141,9 @@
         <div class = "container"> 
             <div class = 'navBar'>
                 <h4> <u>Options:</u></h4>
+                <button onclick="brown()">Brown</button>
+                <button onclick="blue()">Blue</button>
+                <button onclick="christmas()">Christmas</button>
             </div>
             <script type="text/babel">
                 
