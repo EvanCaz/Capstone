@@ -36,7 +36,7 @@
                 }
                 render() { 
                     return ( <>
-                        <div className = "info">
+                        <div className = "info"> 
                         <p>Total Books {this.state.total} </p> 
                         <p>Available Books {this.state.avail} </p>
                         <p>Unavailable Books: {this.state.unavail} </p>
@@ -45,9 +45,81 @@
                     );
                 }
             }
+            class AllBooks extends React.Component {
+                constructor(props) {
+                    super(props);
+                    this.state = { allBooks: []};
+                }
+                componentDidMount() {
+                    this.getData();
+                }  
+                getData() {
+                    fetch(url + "books").then(res => res.json()).then(data => {
+                    this.setState({ allBooks: data });
+                    });
+                }
+                checkOut(id, title) {
+                    if(document.getElementById(id).value == "" || document.getElementById(title).value == ""){
+                        console.log("id or title is null");
+                    } else {
+                        fetch(url + "books/" + id, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "avail": false,
+                            "due": document.getElementById(title).value,
+                            "who": document.getElementById(id).value
+                        })
+                    }).then(res=>res.json()).then(data=>{
+                        console.log(data); // response success/code
+                        this.getData();
+                    });
+                    }
+                }
+                checkIn (id) {
+                    console.log("check in book: " + id);
+                    fetch(url + "books/" + id, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "avail": true,
+                            "due": "",
+                            "who": ""
+                        })
+                    }).then(res=>res.json()).then(data=>{
+                        console.log(data);
+                        this.getData();
+                    });
+                }
+                render() {
+                    let element = document.getElementById("contentPair");
+                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+                    console.log("updated all books")
+                    for(let i = 0; i < this.state.allBooks.length; i++){
+                        if(this.state.allBooks[i].avail == true) { // we want a button
+                            element.innerHTML += "<span class='book-item'>Title: " + this.state.allBooks[i].title +
+                                                    " <br> ID: " + this.state.allBooks[i].id +
+                                                    " <br> Author: " + this.state.allBooks[i].author +
+                                                    " <br> Status: " + this.state.allBooks[i].avail +
+                                                    "<input type='text' id='" + this.state.allBooks[i].id +
+                                                    "' placeholder='Who'> <input type='text' id='" + this.state.allBooks[i].title +
+                                                    "' placeholder='Due Date'> <button onclick='checkOut(" + this.state.allBooks[i].id + ", \"" + this.state.allBooks[i].title +
+                                                    "\")'> Check out</button></span>"
+                        } else {
+                            element.innerHTML += "<span class='book-item'>Title: " + this.state.allBooks[i].title + " <br> ID: " + this.state.allBooks[i].id + 
+                                                    " <br> Author: " + this.state.allBooks[i].author + " <br> Status: " + this.state.allBooks[i].avail + 
+                                                    "<button onclick='this.checkIn(" + this.state.allBooks[i].id + ", \"" + this.state.allBooks[i].title +
+                                                    "\")'> Check In</button></span>";
+                        }
+                    }
+                }
+            }
 
-        </script>
-        <script >
+        
             let url = "http://127.0.0.1:3000/";
             function checkOut(id, title){ // pointless to have title
                 // fetch request that updates info in database, then calls listAvailBooks() to update the page
@@ -67,38 +139,37 @@
                     })
                 }).then(res=>res.json()).then(data=>{
                     console.log(data); // response success/code
-                    listAvailBooks(); // reset
                 });
                 }
             }
-            function listAvailBooks() { 
-                // could have one function with a parameter that specifys if i want to list all books, avail books, or checked out books. then the button would say check in or check out depending on the avail attribute of the book
-                // but i think that function would be incredibly long, but also breaks the rule of dont repeat code
-                console.log("list avail books");
-                fetch(url +"books?avail=true").then(res=>res.json()).then(data=>{
-                    let element = document.getElementById("contentPair");
-                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-                    for (let i = 0; i < data.length; i++) {
-                        element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
-                                                "<input type='text' id='" + data[i].id + "' placeholder = 'Who'><input type='text' id='" + data[i].title + "' placeholder = 'Return Date'><button onclick='checkOut(" + data[i].id + ", \"" + data[i].title + 
-                                                "\")'> Check out</button></span>";
+            // function listAvailBooks() { 
+            //     // could have one function with a parameter that specifys if i want to list all books, avail books, or checked out books. then the button would say check in or check out depending on the avail attribute of the book
+            //     // but i think that function would be incredibly long, but also breaks the rule of dont repeat code
+            //     console.log("list avail books");
+            //     fetch(url +"books?avail=true").then(res=>res.json()).then(data=>{
+            //         let element = document.getElementById("contentPair");
+            //         element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+            //         for (let i = 0; i < data.length; i++) {
+            //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
+            //                                     "<input type='text' id='" + data[i].id + "' placeholder = 'Who'><input type='text' id='" + data[i].title + "' placeholder = 'Return Date'><button onclick='checkOut(" + data[i].id + ", \"" + data[i].title + 
+            //                                     "\")'> Check out</button></span>";
 
-                        // always check out because this is avail books only
-                        // the button should change the avail attribute of the book to false and provide a field to enter the name of the person checking out the book as well as the date its due
+            //             // always check out because this is avail books only
+            //             // the button should change the avail attribute of the book to false and provide a field to enter the name of the person checking out the book as well as the date its due
 
-                    } 
-                });
-            }
-            function listAllBooks() {
-                console.log("list all books");
-                fetch(url + "books").then(res=>res.json()).then(data=>{
-                    let element = document.getElementById("contentPair");
-                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-                    for (let i = 0; i < data.length; i++) {
-                        element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + " <br> Status: " + data[i].avail + "</span>";
-                    } 
-                });
-            }
+            //         } 
+            //     });
+            // }
+            // function listAllBooks() {
+            //     console.log("list all books");
+            //     fetch(url + "books").then(res=>res.json()).then(data=>{
+            //         let element = document.getElementById("contentPair");
+            //         element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+            //         for (let i = 0; i < data.length; i++) {
+            //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author + " <br> Status: " + data[i].avail + "</span>";
+            //         } 
+            //     });
+            // }
             function checkIn(id) {
                 console.log("check in book: " + id);
                 fetch(url + "books/" + id, {
@@ -113,21 +184,20 @@
                     })
                 }).then(res=>res.json()).then(data=>{
                     console.log(data);
-                    listCheckedOutBooks();
                 });
             }
-            function listCheckedOutBooks(){
-                console.log("list unavail books");
-                fetch(url + "books?avail=false").then(res=>res.json()).then(data=>{
-                    let element = document.getElementById("contentPair");
-                    element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
-                    for (let i = 0; i < data.length; i++) {
-                        element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
-                                                "<button onclick='checkIn(" + data[i].id + ", \"" + data[i].title + 
-                                                "\")'> Check in</button></span>";
-                    } 
-                });
-            } 
+            // function listCheckedOutBooks(){
+            //     console.log("list unavail books");
+            //     fetch(url + "books?avail=false").then(res=>res.json()).then(data=>{
+            //         let element = document.getElementById("contentPair");
+            //         element.innerHTML = ""; // clear it because it is not a react componet, unsure how to do this in react
+            //         for (let i = 0; i < data.length; i++) {
+            //             element.innerHTML += "<span class='book-item'>Title: " + data[i].title + " <br> ID: " + data[i].id + " <br> Author: " + data[i].author +
+            //                                     "<button onclick='checkIn(" + data[i].id + ", \"" + data[i].title + 
+            //                                     "\")'> Check in</button></span>";
+            //         } 
+            //     });
+            // } 
             /*
                 This code breaks the cardinal rule of repeating code, that can be addressed but adds a lot of complexity(not really) but makes the function very long and lowers readability 
                 cases the code does not handle: 
@@ -146,15 +216,19 @@
         <div class = "container"> 
             <div class = 'navBar'>
                 <h4> <u>Options:</u></h4>
-                <button id = "availableBooks" onclick="listAvailBooks()">Available Books</button>
+                <!-- <button id = "availableBooks" onclick="listAvailBooks()">Available Books</button>
                 <button id = "allBooks" onclick="listAllBooks()">All Books</button>
-                <button id = "checkedOutBooks" onclick="listCheckedOutBooks()">Checked Out Books</button>
+                <button id = "checkedOutBooks" onclick="listCheckedOutBooks()">Checked Out Books</button> -->
             </div>
             <script type="text/babel">
                 
             </script>
             <div class = "mainContent">
-                <p id = "contentPair"></p>
+                <div id = "contentPair"></div>
+                <script type="text/babel">
+                    const root2 = ReactDOM.createRoot(document.getElementById('contentPair'));
+                    root2.render(<AllBooks />);
+                </script>
             </div>
             <div class = 'sideBar'>
                 <h4>
@@ -162,9 +236,8 @@
                 </h4>
                 <div id="totalBooks"> </div>
                 <script type="text/babel">
-                    const root = ReactDOM.createRoot(document.getElementById('totalBooks'));
-                    root.render(<TotalBooks />);
-                    
+                    const root1 = ReactDOM.createRoot(document.getElementById('totalBooks'));
+                    root1.render(<TotalBooks />);
                 </script>
             </div>
         </div>
