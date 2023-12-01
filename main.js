@@ -28,7 +28,7 @@ async function start(){
  // need the standard functions to handle server requests and update the monogo server
  app.get('/books', (req, res) => {
     let status = req.query.avail === "true";
-    let projection = { title: 1, id: 1, _id:0, author:1, avail:1 }; // Include only title and id fields
+    let projection = { title: 1, id: 1, _id:0, author:1, avail:1 }; // Include only title and id fields and avail status
     if (req.query.avail === undefined) {
         books.find({}, { projection }).toArray().then(books => res.json(books));
     } else {
@@ -40,9 +40,8 @@ async function start(){
 app.put('/books/:id', (req, res) => {
     let newbook = req.body;
     books.updateOne({ id: req.params.id }, { $set: newbook }).then(result => {
-        res.status(result.modifiedCount > 0 ? 200 : 404).json(result.modifiedCount > 0 ? "Book updated" : "Book not found");
+        res.status(result.modifiedCount > 0 ? 200 : 404).json(result.modifiedCount > 0 ? "Book updated" : "Book not found"); // should never fail because id cannot be wrong
     });
 });
-
 
 start();
