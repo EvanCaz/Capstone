@@ -9,6 +9,7 @@
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
         <script type="text/babel">
             const { useState } = React; // import { useState } from 'react';
+            let url = "http://127.0.0.1:3000/";
             class TotalBooks extends React.Component { 
                 constructor(props) { super(props);
                 this.state = { total: 0, avail: 0, unavail: 0 };
@@ -53,7 +54,28 @@
                     this.setState({ allBooks: data });
                     });
                 }
-                render() { // i like the inline ternary operator it is dope 
+                checkOut(id, title) {
+                    console.log("Checking out book" + id + " with due date " + document.getElementById(title).value);
+                    if (document.getElementById(id).value == "" || document.getElementById(title).value == "") {
+                        console.log("id or title is null");
+                    } else {
+                        fetch(url + "books/" + id, { // start request for url/books/id but url is not defined rn
+                            method: 'PUT', // specify the method   
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                "avail": false,
+                                "due": document.getElementById(title).value,
+                                "who": document.getElementById(id).value
+                            })
+                        }).then(res => res.json()).then(data => {
+                            console.log(data); // response success/code
+                            this.getData(); // referesh page
+                        });
+                    }
+                }
+                render() { // i like the inline ternary operator they is dope 
                     return (
                         <div>
                             {this.state.allBooks.map(book => (
@@ -66,7 +88,7 @@
                                 <>
                                     <input type="text" id={book.id} placeholder="Who" />
                                     <input type="text" id={book.title} placeholder="Due Date" />
-                                    <button onClick={() => checkOut(book.id, book.title)}>Check out</button>
+                                    <button onClick={() => this.checkOut(book.id, book.title)}>Check out</button>
                                 </>
                                 ) : (
                                 <button onClick={() => checkIn(book.id, book.title)}>Check In</button>
@@ -78,7 +100,6 @@
                 }
             }
 
-            let url = "http://127.0.0.1:3000/";
             function checkIn(id) {
                 console.log("check in book: " + id);
                 fetch(url + "books/" + id, {
